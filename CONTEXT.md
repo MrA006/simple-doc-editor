@@ -58,3 +58,18 @@ Tracking abstract context for each step and change made during development.
 - Two integration tests for import
 
 ---
+
+## Step 3: Sharing
+
+**Goal:** Document owners can share with seeded users. Shared users can view/edit but not delete or re-share. Dashboard shows "Shared with me" section.
+
+**Key Decisions:**
+- Owner shares via dropdown in ShareModal (panel, not real modal)
+- Shared users see "Owned by [name] / You have edit access" (no share controls)
+- Sidebar has two sections: "My Documents" + "Shared with me" with divider
+- GET /api/documents enriched with `sharedCount` field
+- GET /api/documents/[id] enriched with `isOwner` + `sharedWith` fields
+- Document deletion with inline confirmation (Sure? Yes/No)
+- Shared docs show "Shared" badge in sidebar
+
+---

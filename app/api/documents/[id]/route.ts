@@ -13,6 +13,9 @@ export async function GET(
 
   const document = await prisma.document.findUnique({
     where: { id: params.id },
+    include: {
+      owner: { select: { id: true, name: true, email: true } },
+    },
   });
 
   if (!document) {
@@ -28,9 +31,21 @@ export async function GET(
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
+  const shares = await prisma.sharedDoc.findMany({
+    where: { documentId: params.id },
+    include: { user: { select: { id: true, name: true, email: true } } },
+  });
+
   return NextResponse.json({
-    ...document,
+    id: document.id,
+    title: document.title,
     content: JSON.parse(document.content as string),
+    createdAt: document.createdAt,
+    updatedAt: document.updatedAt,
+    ownerId: document.ownerId,
+    isOwner,
+    owner: document.owner,
+    sharedWith: shares.map((s) => s.user),
   });
 }
 

@@ -34,12 +34,19 @@ export async function GET() {
   const documents = await prisma.document.findMany({
     where: { ownerId: user.id },
     orderBy: { updatedAt: "desc" },
+    include: {
+      _count: { select: { sharedWith: true } },
+    },
   });
 
-  return NextResponse.json(
-    documents.map((doc: { content: string; [key: string]: unknown }) => ({
-      ...doc,
-      content: JSON.parse(doc.content),
-    }))
-  );
+  return NextResponse.json({
+    documents: documents.map((doc) => ({
+      id: doc.id,
+      title: doc.title,
+      updatedAt: doc.updatedAt,
+      createdAt: doc.createdAt,
+      isOwner: true,
+      sharedCount: doc._count.sharedWith,
+    })),
+  });
 }

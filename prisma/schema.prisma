@@ -19,18 +19,20 @@ model User {
 }
 
 model Document {
-  id        String   @id @default(cuid())
-  title     String   @default("Untitled Document")
-  content   String   @default("{}")
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        String     @id @default(cuid())
+  title     String     @default("Untitled Document")
+  content   String     @default("{}")
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
   ownerId   String
-  owner     User     @relation("DocumentOwner", fields: [ownerId], references: [id])
+  owner     User       @relation("DocumentOwner", fields: [ownerId], references: [id])
+  sharedWith SharedDoc[]
 }
 
 model SharedDoc {
   id         String   @id @default(cuid())
   documentId String
+  document   Document @relation(fields: [documentId], references: [id])
   userId     String
   user       User     @relation(fields: [userId], references: [id])
   createdAt  DateTime @default(now())

@@ -4,14 +4,25 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import TiptapEditor from "@/components/editor/TiptapEditor";
+import ShareModal from "@/components/ui/ShareModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { timeAgo } from "@/lib/utils";
+
+interface SharedUser {
+  id: string;
+  name: string;
+  email: string;
+}
 
 interface Document {
   id: string;
   title: string;
   content: string;
   updatedAt: string;
+  ownerId: string;
+  isOwner: boolean;
+  owner?: { id: string; name: string; email: string };
+  sharedWith: SharedUser[];
 }
 
 export default function DocumentPage() {
@@ -26,6 +37,7 @@ export default function DocumentPage() {
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
   const [consecutiveErrors, setConsecutiveErrors] = useState(0);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
+  const [showShare, setShowShare] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -201,8 +213,29 @@ export default function DocumentPage() {
               {saveStatus === "error" && <span className="text-red-500">Save failed</span>}
               {saveStatus === "idle" && lastSaved && `Saved ${timeAgo(lastSaved)}`}
             </span>
-            <button className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border border-gray-200 hover:bg-gray-50">
-              Share
+            <div className="relative">
+              <button
+                onClick={() => setShowShare(true)}
+                className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border border-gray-200 hover:bg-gray-50"
+              >
+                Share
+              </button>
+              {showShare && document && (
+                <ShareModal
+                  documentId={document.id}
+                  isOwner={document.isOwner}
+                  ownerId={document.ownerId}
+                  ownerName={document.owner?.name}
+                  sharedWith={document.sharedWith || []}
+                  onClose={() => setShowShare(false)}
+                />
+              )}
+            </div>
+            <button
+              onClick={() => router.push("/login")}
+              className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border border-gray-200 hover:bg-gray-50"
+            >
+              Logout
             </button>
           </div>
         </div>
