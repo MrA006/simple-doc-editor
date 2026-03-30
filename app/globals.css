@@ -4,20 +4,38 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --foreground: #000000;
 }
 
 body {
   color: var(--foreground);
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
+}
+
+.tiptap {
+  color: #000000;
+  outline: none;
+}
+
+.tiptap p {
+  color: #000000;
+}
+
+.tiptap h1, .tiptap h2, .tiptap h3 {
+  color: #000000;
+}
+
+.tiptap ul, .tiptap ol {
+  color: #000000;
+}
+
+.tiptap p.is-editor-empty:first-child::before {
+  color: #9ca3af;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }
 
 @layer utilities {

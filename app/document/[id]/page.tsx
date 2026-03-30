@@ -34,13 +34,8 @@ export default function DocumentPage() {
     }
   }, [user, userLoading, router]);
 
-  useEffect(() => {
-    if (params.id && user) {
-      fetchDocument();
-    }
-  }, [params.id, user]);
-
-  async function fetchDocument() {
+  const fetchDocument = useCallback(async () => {
+    if (!params.id) return;
     setDocLoading(true);
     setError(null);
     try {
@@ -65,7 +60,13 @@ export default function DocumentPage() {
     } finally {
       setDocLoading(false);
     }
-  }
+  }, [params.id]);
+
+  useEffect(() => {
+    if (params.id && user) {
+      fetchDocument();
+    }
+  }, [params.id, user, fetchDocument]);
 
   const handleTitleSave = useCallback(async () => {
     if (!document) return;
@@ -207,7 +208,7 @@ export default function DocumentPage() {
         </div>
         <div className="flex-1 overflow-hidden">
           <TiptapEditor
-            content={document.content}
+            content={typeof document.content === "string" ? document.content : JSON.stringify(document.content)}
             onUpdate={handleContentUpdate}
           />
         </div>
