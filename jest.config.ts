@@ -6,10 +6,16 @@ const createJestConfig = nextJest({
 });
 
 const config: Config = {
-  testEnvironment: "jsdom",
-  setupFilesAfterEnv: ["<rootDir>/__tests__/setup.ts"],
+  testEnvironment: "node",
+  testPathIgnorePatterns: ["/node_modules/", "/__tests__/setup.ts"],
   moduleNameMapper: {
     "^@/(.*)$": "<rootDir>/$1",
+  },
+  transformIgnorePatterns: [
+    "/node_modules/(?!(marked)/)",
+  ],
+  transform: {
+    "^.+\\.(ts|tsx)$": "ts-jest",
   },
 };
 

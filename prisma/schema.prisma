@@ -27,6 +27,7 @@ model Document {
   ownerId   String
   owner     User       @relation("DocumentOwner", fields: [ownerId], references: [id])
   sharedWith SharedDoc[]
+  versions  DocumentVersion[]
 }
 
 model SharedDoc {
@@ -38,4 +39,13 @@ model SharedDoc {
   createdAt  DateTime @default(now())
 
   @@unique([documentId, userId])
+}
+
+model DocumentVersion {
+  id         String   @id @default(cuid())
+  documentId String
+  document   Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  content    String
+  title      String
+  savedAt    DateTime @default(now())
 }

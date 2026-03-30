@@ -73,3 +73,23 @@ Tracking abstract context for each step and change made during development.
 - Shared docs show "Shared" badge in sidebar
 
 ---
+
+## Step 4: Polish, Testing & Submission
+
+**Goal:** Add stretch feature (version history), cleanup code, write documentation.
+
+**Stretch Feature — Document Version History:**
+- `DocumentVersion` model: id, documentId, content (JSON), title, savedAt
+- Every 5th save creates a version snapshot
+- Max 10 versions per document (oldest deleted on insert)
+- History side panel shows versions as timestamps
+- Click to preview read-only, "Restore this version" button
+- No extra dependencies
+
+**Documentation Deliverables:**
+- README.md — setup instructions
+- ARCHITECTURE.md — technical decisions
+- AI_WORKFLOW.md — AI tool usage
+- SUBMISSION.md — what's included/working
+
+---

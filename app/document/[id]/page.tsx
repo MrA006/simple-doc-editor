@@ -4,6 +4,7 @@ import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Sidebar from "@/components/sidebar/Sidebar";
 import TiptapEditor from "@/components/editor/TiptapEditor";
+import HistoryPanel from "@/components/editor/HistoryPanel";
 import ShareModal from "@/components/ui/ShareModal";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { timeAgo } from "@/lib/utils";
@@ -38,7 +39,9 @@ export default function DocumentPage() {
   const [consecutiveErrors, setConsecutiveErrors] = useState(0);
   const [isEditingTitle, setIsEditingTitle] = useState(false);
   const [showShare, setShowShare] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
   const titleInputRef = useRef<HTMLInputElement>(null);
+  const saveCountRef = useRef(0);
 
   useEffect(() => {
     if (!userLoading && !user) {
@@ -123,6 +126,16 @@ export default function DocumentPage() {
         setSaveStatus("saved");
         setLastSaved(new Date());
         setConsecutiveErrors(0);
+        saveCountRef.current += 1;
+
+        if (saveCountRef.current % 5 === 0) {
+          fetch(`/api/documents/${document.id}/versions`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ content: JSON.parse(content), title: document.title }),
+          }).catch(() => {});
+        }
+
         setTimeout(() => setSaveStatus("idle"), 2000);
       } else {
         throw new Error("Save failed");
@@ -139,6 +152,19 @@ export default function DocumentPage() {
       titleInputRef.current.select();
     }
   }, [isEditingTitle]);
+
+  const handleRestoreVersion = useCallback(async (content: object) => {
+    if (!document) return;
+    const res = await fetch(`/api/documents/${document.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ content }),
+    });
+    if (res.ok) {
+      setDocument((prev) => prev ? { ...prev, content: JSON.stringify(content) } : prev);
+      setShowHistory(false);
+    }
+  }, [document]);
 
   if (userLoading || docLoading) {
     return (
@@ -232,6 +258,16 @@ export default function DocumentPage() {
               )}
             </div>
             <button
+              onClick={() => setShowHistory(!showHistory)}
+              className={`text-sm px-3 py-1 rounded border transition-colors ${
+                showHistory
+                  ? "bg-blue-50 text-blue-700 border-blue-200"
+                  : "text-gray-500 hover:text-gray-700 border-gray-200 hover:bg-gray-50"
+              }`}
+            >
+              History
+            </button>
+            <button
               onClick={() => router.push("/login")}
               className="text-sm text-gray-500 hover:text-gray-700 px-3 py-1 rounded border border-gray-200 hover:bg-gray-50"
             >
@@ -239,11 +275,21 @@ export default function DocumentPage() {
             </button>
           </div>
         </div>
-        <div className="flex-1 overflow-hidden">
-          <TiptapEditor
-            content={typeof document.content === "string" ? document.content : JSON.stringify(document.content)}
-            onUpdate={handleContentUpdate}
-          />
+        <div className="flex-1 flex overflow-hidden">
+          <div className="flex-1 overflow-hidden">
+            <TiptapEditor
+              content={typeof document.content === "string" ? document.content : JSON.stringify(document.content)}
+              onUpdate={handleContentUpdate}
+            />
+          </div>
+          {showHistory && document && (
+            <HistoryPanel
+              documentId={document.id}
+              isOwner={document.isOwner}
+              onRestore={handleRestoreVersion}
+              onClose={() => setShowHistory(false)}
+            />
+          )}
         </div>
       </div>
     </div>

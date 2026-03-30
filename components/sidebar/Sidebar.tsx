@@ -168,10 +168,10 @@ export default function Sidebar({ onTitleUpdate }: SidebarProps) {
                       e.stopPropagation();
                       setDeletingId(doc.id);
                     }}
-                    className="absolute right-2 top-2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-600 text-lg leading-none"
+                    className="absolute right-2 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-red-500 text-xs px-1.5 py-0.5 rounded hover:bg-red-50 transition-colors"
                     title="Delete"
                   >
-                    &hellip;
+                    Delete
                   </button>
                 )}
               </li>
