@@ -1,6 +1,7 @@
 "use client";
 
 import Sidebar from "@/components/sidebar/Sidebar";
+import FileUpload from "@/components/ui/FileUpload";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
@@ -35,6 +36,9 @@ export default function DashboardPage() {
           </h2>
           <p className="text-gray-500">
             Select a document or create a new one
+          </p>
+          <p className="text-gray-400 text-sm mt-2">
+            or <FileUpload variant="link" />
           </p>
         </div>
       </div>

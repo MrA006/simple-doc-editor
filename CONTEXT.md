@@ -41,3 +41,20 @@ Tracking abstract context for each step and change made during development.
 - Integration test: POST /api/documents with correct ownerId
 
 ---
+
+## Step 2: File Upload
+
+**Goal:** Import .txt and .md files as editable Tiptap documents.
+
+**Key Decisions:**
+- Upload converts to new editable document (not attachment)
+- Supported types: .txt and .md only
+- .txt: split on `\n\n` → paragraphs → Tiptap JSON
+- .md: `marked.parse()` → HTML → `generateJSON()` → Tiptap JSON
+- File size limit: 2MB server-side
+- Filename strips extension → document title
+- Entry points: Sidebar "Import File" button + Dashboard empty state link
+- POST /api/documents/import route with multipart/form-data
+- Two integration tests for import
+
+---

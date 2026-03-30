@@ -89,3 +89,57 @@ describe("POST /api/documents", () => {
     expect(response.status).toBe(401);
   });
 });
+
+describe("POST /api/documents/import", () => {
+  let testUser: { id: string; email: string; name: string };
+
+  beforeAll(async () => {
+    testUser = await prisma.user.create({
+      data: {
+        id: "test-user-import",
+        email: "import@example.com",
+        name: "Import User",
+      },
+    });
+  });
+
+  afterAll(async () => {
+    await prisma.document.deleteMany({
+      where: { ownerId: testUser.id },
+    });
+    await prisma.user.delete({
+      where: { id: testUser.id },
+    });
+    await prisma.$disconnect();
+  });
+
+  it("should import a .txt file with correct paragraph structure", async () => {
+    const { POST } = await import("@/app/api/documents/import/route");
+
+    const fileContent = "Hello world\n\nSecond paragraph";
+    const blob = new Blob([fileContent], { type: "text/plain" });
+    const file = new File([blob], "test-notes.txt", { type: "text/plain" });
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const request = new Request("http://localhost/api/documents/import", {
+      method: "POST",
+      body: formData,
+    });
+
+    const response = await POST(request);
+    const data = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(data.title).toBe("test-notes");
+    expect(data.ownerId).toBe(testUser.id);
+    expect(data.content.type).toBe("doc");
+    expect(data.content.content).toHaveLength(2);
+    expect(data.content.content[0].type).toBe("paragraph");
+    expect(data.content.content[0].content[0].text).toBe("Hello world");
+    expect(data.content.content[1].content[0].text).toBe("Second paragraph");
+
+    await prisma.document.delete({ where: { id: data.id } });
+  });
+});

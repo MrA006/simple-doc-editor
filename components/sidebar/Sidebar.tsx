@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { timeAgo } from "@/lib/utils";
+import FileUpload from "@/components/ui/FileUpload";
 
 interface Document {
   id: string;
@@ -68,13 +69,14 @@ export default function Sidebar({ onTitleUpdate }: SidebarProps) {
       <div className="p-4 border-b border-gray-200">
         <h1 className="text-lg font-semibold text-gray-800">Doc Editor</h1>
       </div>
-      <div className="p-3">
+      <div className="p-3 space-y-2">
         <button
           onClick={handleNewDocument}
           className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
         >
           New Document
         </button>
+        <FileUpload variant="button" />
       </div>
       <div className="flex-1 overflow-y-auto px-3">
         <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-1">
