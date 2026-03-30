@@ -1,0 +1,111 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter, usePathname } from "next/navigation";
+import { timeAgo } from "@/lib/utils";
+
+interface Document {
+  id: string;
+  title: string;
+  updatedAt: string;
+}
+
+interface SidebarProps {
+  onTitleUpdate?: (id: string, title: string) => void;
+}
+
+export default function Sidebar({ onTitleUpdate }: SidebarProps) {
+  const [documents, setDocuments] = useState<Document[]>([]);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
+  const pathname = usePathname();
+
+  const activeDocId = pathname?.startsWith("/document/")
+    ? pathname.split("/document/")[1]
+    : null;
+
+  useEffect(() => {
+    fetchDocuments();
+  }, []);
+
+  useEffect(() => {
+    if (onTitleUpdate) {
+      (window as unknown as { __sidebarUpdateTitle?: (id: string, title: string) => void }).__sidebarUpdateTitle = (id: string, title: string) => {
+        setDocuments((prev) =>
+          prev.map((doc) => (doc.id === id ? { ...doc, title } : doc))
+        );
+      };
+    }
+  }, [onTitleUpdate]);
+
+  async function fetchDocuments() {
+    try {
+      const res = await fetch("/api/documents");
+      if (res.ok) {
+        const data = await res.json();
+        setDocuments(data);
+      }
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function handleNewDocument() {
+    const res = await fetch("/api/documents", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({}),
+    });
+    if (res.ok) {
+      const doc = await res.json();
+      router.push(`/document/${doc.id}`);
+      fetchDocuments();
+    }
+  }
+
+  return (
+    <div className="w-60 bg-gray-50 border-r border-gray-200 h-screen flex flex-col">
+      <div className="p-4 border-b border-gray-200">
+        <h1 className="text-lg font-semibold text-gray-800">Doc Editor</h1>
+      </div>
+      <div className="p-3">
+        <button
+          onClick={handleNewDocument}
+          className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors text-sm font-medium"
+        >
+          New Document
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto px-3">
+        <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-2 px-1">
+          My Documents
+        </p>
+        {loading ? (
+          <p className="text-sm text-gray-400 px-1">Loading...</p>
+        ) : documents.length === 0 ? (
+          <p className="text-sm text-gray-400 px-1">No documents yet</p>
+        ) : (
+          <ul className="space-y-1">
+            {documents.map((doc) => (
+              <li key={doc.id}>
+                <button
+                  onClick={() => router.push(`/document/${doc.id}`)}
+                  className={`w-full text-left px-3 py-2 rounded-md text-sm transition-colors ${
+                    activeDocId === doc.id
+                      ? "bg-blue-100 text-blue-700"
+                      : "hover:bg-gray-100 text-gray-700"
+                  }`}
+                >
+                  <div className="font-medium truncate">{doc.title}</div>
+                  <div className="text-xs text-gray-400">
+                    {timeAgo(new Date(doc.updatedAt))}
+                  </div>
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </div>
+  );
+}
